@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f9;
+    }
+    .chat-container {
+      width: 400px;
+      max-width: 90%;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #fff;
+      padding: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .messages {
+      height: 300px;
+      overflow-y: auto;
+      border-bottom: 1px solid #ddd;
+      padding: 10px;
+    }
+    .input-container {
+      display: flex;
+    }
+    .input-container input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .input-container button {
+      padding: 10px;
+      margin-left: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .input-container button:hover {
+      background-color: #0056b3;
+    }
+    .message {
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .user {
+      background: #007bff;
+      color: white;
+      align-self: flex-end;
+    }
+    .bot {
+      background: #f1f1f1;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="messages" id="messages"></div>
+    <div class="input-container">
+      <input type="text" id="userInput" placeholder="Type your question...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const messagesContainer = document.getElementById("messages");
+
+    // Hàm gửi tin nhắn
+    async function sendMessage() {
+      const userInput = document.getElementById("userInput");
+      const messageText = userInput.value.trim();
+      if (messageText === "") return;
+
+      // Hiển thị tin nhắn người dùng
+      addMessage(messageText, "user");
+
+      // Gửi tin nhắn đến OpenAI API
+      const botReply = await getBotReply(messageText);
+      addMessage(botReply, "bot");
+
+      // Xóa input
+      userInput.value = "";
+    }
+
+    function addMessage(text, sender) {
+      const message = document.createElement("div");
+      message.className = `message ${sender}`;
+      message.textContent = text;
+      messagesContainer.appendChild(message);
+
+      // Tự động cuộn xuống cuối
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Hàm gọi OpenAI API
+    async function getBotReply(userMessage) {
+      const API_KEY = "YOUR_API_KEY"; // Thay YOUR_API_KEY bằng API Key của bạn
+      const url = "https://api.openai.com/v1/chat/completions";
+
+      const data = {
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: userMessage }],
+        max_tokens: 100,
+        temperature: 0.7
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${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}`
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error("Error fetching the response from the API");
+        }
+
+        const result = await response.json();
+        return result.choices[0].message.content.trim();
+      } catch (error) {
+        console.error("Error:", error);
+        return "Sorry, I couldn't process your request.";
+      }
+    }
+  </script>
+</body>
+</html>
